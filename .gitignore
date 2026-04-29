@@ -1,0 +1,33 @@
+# Unity generated folders
+/Library/
+/Temp/
+/Obj/
+/Build/
+/Builds/
+/Logs/
+/UserSettings/
+/.utmp/
+
+# Unity/IDE generated files
+*.csproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Unity build artifacts
+/build/
+*.apk
+*.aab
+
+# OS/editor noise
+.DS_Store
+.idea/
+.vscode/
