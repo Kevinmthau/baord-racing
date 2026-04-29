@@ -61,7 +61,7 @@ namespace BoardRacing
         private void CreateCars()
         {
             var spawn = track.GetPoseAtDistance(1.35f);
-            var sideOffset = spawn.Normal * 0.62f;
+            var sideOffset = spawn.Normal * GetLaneOffset();
 
             redCar = CarFactory.Create("Player 1 Red Car", 0, Color.red, spawn.Position + sideOffset, spawn.Rotation);
             blueCar = CarFactory.Create("Player 2 Blue Car", 1, new Color(0.05f, 0.32f, 1f), spawn.Position - sideOffset, spawn.Rotation);
@@ -83,8 +83,9 @@ namespace BoardRacing
             winner = null;
 
             var spawn = track.GetPoseAtDistance(1.35f);
-            redCar.ResetCar(spawn.Position + spawn.Normal * 0.62f, spawn.Rotation);
-            blueCar.ResetCar(spawn.Position - spawn.Normal * 0.62f, spawn.Rotation);
+            var sideOffset = spawn.Normal * GetLaneOffset();
+            redCar.ResetCar(spawn.Position + sideOffset, spawn.Rotation);
+            blueCar.ResetCar(spawn.Position - sideOffset, spawn.Rotation);
 
             foreach (var racer in racers)
             {
@@ -94,6 +95,11 @@ namespace BoardRacing
             redCar.SetInputLocked(false);
             blueCar.SetInputLocked(false);
             hud.SetRestartVisible(false);
+        }
+
+        private float GetLaneOffset()
+        {
+            return track.TrackWidth * 0.18f;
         }
 
         private void HandleRacerFinished(RaceProgressTracker tracker)

@@ -5,7 +5,8 @@ namespace BoardRacing
 {
     public static class TrackBuilder
     {
-        private const float TrackWidth = 4.2f;
+        private const float TrackWidth = 5.4f;
+        private const float HorizontalTrackScale = 1.14f;
         private const int SamplesPerCurve = 14;
 
         public static RaceTrack Build()
@@ -27,7 +28,7 @@ namespace BoardRacing
                 new Vector2(-13.4f, 1.6f)
             };
 
-            var samples = BuildCatmullRomLoop(controlPoints);
+            var samples = BuildCatmullRomLoop(WidenControlPoints(controlPoints));
             var track = new RaceTrack(samples, TrackWidth, BuildCheckpointFractions());
 
             CreateBackground(root.transform);
@@ -42,6 +43,26 @@ namespace BoardRacing
         private static float[] BuildCheckpointFractions()
         {
             return new[] { 0f, 0.14f, 0.28f, 0.43f, 0.58f, 0.73f, 0.87f };
+        }
+
+        private static Vector2[] WidenControlPoints(IReadOnlyList<Vector2> points)
+        {
+            var minX = float.MaxValue;
+            var maxX = float.MinValue;
+            for (var i = 0; i < points.Count; i++)
+            {
+                minX = Mathf.Min(minX, points[i].x);
+                maxX = Mathf.Max(maxX, points[i].x);
+            }
+
+            var centerX = (minX + maxX) * 0.5f;
+            var widened = new Vector2[points.Count];
+            for (var i = 0; i < points.Count; i++)
+            {
+                widened[i] = new Vector2(centerX + (points[i].x - centerX) * HorizontalTrackScale, points[i].y);
+            }
+
+            return widened;
         }
 
         private static Vector2[] BuildCatmullRomLoop(IReadOnlyList<Vector2> points)
@@ -184,8 +205,8 @@ namespace BoardRacing
 
                 var line = dash.AddComponent<LineRenderer>();
                 line.positionCount = 2;
-                line.SetPosition(0, new Vector3(0f, -0.55f, 0f));
-                line.SetPosition(1, new Vector3(0f, 0.55f, 0f));
+                line.SetPosition(0, new Vector3(0f, -TrackWidth * 0.13f, 0f));
+                line.SetPosition(1, new Vector3(0f, TrackWidth * 0.13f, 0f));
                 line.useWorldSpace = false;
                 line.widthMultiplier = 0.12f;
                 line.numCapVertices = 3;
@@ -201,12 +222,14 @@ namespace BoardRacing
             finish.transform.SetParent(root, false);
             finish.transform.SetPositionAndRotation(pose.Position, Quaternion.Euler(0f, 0f, pose.NormalRotation));
 
-            for (var i = 0; i < 7; i++)
+            var stripeCount = Mathf.CeilToInt(TrackWidth / 0.58f);
+            var stripeWidth = TrackWidth / stripeCount;
+            for (var i = 0; i < stripeCount; i++)
             {
                 var stripe = new GameObject($"Finish Stripe {i + 1}");
                 stripe.transform.SetParent(finish.transform, false);
-                stripe.transform.localPosition = new Vector3(-TrackWidth * 0.5f + 0.35f + i * 0.58f, 0f, 0f);
-                stripe.transform.localScale = new Vector3(0.32f, 0.85f, 1f);
+                stripe.transform.localPosition = new Vector3(-TrackWidth * 0.5f + stripeWidth * (i + 0.5f), 0f, 0f);
+                stripe.transform.localScale = new Vector3(stripeWidth, 0.85f, 1f);
 
                 var renderer = stripe.AddComponent<SpriteRenderer>();
                 renderer.sprite = RacingVisuals.WhiteSprite;
